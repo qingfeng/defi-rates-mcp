@@ -1,6 +1,21 @@
 # DeFi Rates MCP Server
 
+[![npm version](https://img.shields.io/npm/v/@asahi001/defi-rates-mcp)](https://www.npmjs.com/package/@asahi001/defi-rates-mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://img.shields.io/github/stars/qingfeng/defi-rates-mcp)](https://github.com/qingfeng/defi-rates-mcp/stargazers)
+[![Node Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org)
+
 Model Context Protocol (MCP) server that provides AI assistants with access to real-time DeFi lending rates data.
+
+**🎯 Give Claude and other AI assistants the power to query DeFi rates in real-time!**
+
+## ✨ Highlights
+
+- 📊 **13+ Protocols**: Aave, Morpho, Compound, Venus, Lista, Moonwell, Euler, Drift, Solend, Jupiter & more
+- ⚡ **Real-time Data**: Updated hourly from production DeFi protocols
+- 🔧 **5 Powerful Tools**: Query rates, compare platforms, calculate strategies
+- 🤖 **AI-Ready**: Built for Claude Desktop, Cline, and other MCP clients
+- 🌐 **Multi-Chain**: Ethereum, Arbitrum, Base, BSC, Solana, HyperEVM
 
 ## Features
 
@@ -48,6 +63,30 @@ Compare rates across different platforms for the same asset pair.
 - `asset` (required): The borrow asset
 - `collateral` (required): The collateral asset
 - `chain` (optional): Filter by blockchain
+
+## 🚀 Quick Start
+
+1. Install the package:
+```bash
+npm install -g @asahi001/defi-rates-mcp
+```
+
+2. Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "defi-rates": {
+      "command": "npx",
+      "args": ["-y", "@asahi001/defi-rates-mcp"]
+    }
+  }
+}
+```
+
+3. Restart Claude Desktop and start asking:
+   - *"What are the current USDC borrow rates on Aave?"*
+   - *"Find the best USDT supply rates across all platforms"*
+   - *"Calculate a looping strategy with 10 ETH on Morpho"*
 
 ## Installation
 
