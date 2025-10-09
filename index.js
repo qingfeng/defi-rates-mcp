@@ -13,7 +13,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import axios from 'axios';
 
-const WORKER_URL = 'https://defi-rates.qingfenghello.workers.dev';
+const WORKER_URL = 'https://defiborrow.loan';
 
 // 创建 MCP 服务器实例
 const server = new Server(

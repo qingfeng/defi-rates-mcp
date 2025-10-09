@@ -9,6 +9,8 @@ Model Context Protocol (MCP) server that provides AI assistants with access to r
 
 **🎯 Give Claude and other AI assistants the power to query DeFi rates in real-time!**
 
+🌐 **Website**: [defiborrow.loan](https://defiborrow.loan/)
+
 ## ✨ Highlights
 
 - 📊 **13+ Protocols**: Aave, Morpho, Compound, Venus, Lista, Moonwell, Euler, Drift, Solend, Jupiter & more
@@ -173,7 +175,8 @@ Once configured, you can ask Claude:
 ## Data Source
 
 This MCP server fetches data from:
-- **API Endpoint**: https://defi-rates.qingfenghello.workers.dev
+- **Website**: https://defiborrow.loan
+- **API Endpoint**: https://defiborrow.loan/api
 - **Update Frequency**: Real-time (data updated every hour)
 - **Supported Platforms**:
   - Aave (Ethereum, Arbitrum, Base)
