@@ -1,5 +1,5 @@
 {
-  "name": "@defiborrow/rates-mcp",
+  "name": "@asahi001/defi-rates-mcp",
   "version": "1.0.0",
   "description": "MCP server providing AI access to real-time DeFi lending rates across 13+ protocols",
   "type": "module",
@@ -29,11 +29,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/defi-rates-mcp.git"
+    "url": "https://github.com/qingfeng/defi-rates-mcp.git"
   },
   "homepage": "https://defiborrow.loan",
   "bugs": {
-    "url": "https://github.com/yourusername/defi-rates-mcp/issues"
+    "url": "https://github.com/qingfeng/defi-rates-mcp/issues"
   },
   "engines": {
     "node": ">=18.0.0"

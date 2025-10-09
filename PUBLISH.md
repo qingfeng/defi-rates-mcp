@@ -42,7 +42,7 @@ npm publish
 发布后，其他人可以直接安装：
 
 ```bash
-npm install -g @defiborrow/rates-mcp
+npm install -g @asahi001/defi-rates-mcp
 ```
 
 在 Claude Desktop 配置中使用：
@@ -89,7 +89,7 @@ git push -u origin main
 其他人可以克隆使用：
 
 ```bash
-git clone https://github.com/yourusername/defi-rates-mcp.git
+git clone https://github.com/qingfeng/defi-rates-mcp.git
 cd defi-rates-mcp
 npm install
 ```
@@ -123,11 +123,11 @@ https://github.com/modelcontextprotocol/servers
 
 ```json
 {
-  "name": "@defiborrow/rates-mcp",
+  "name": "@asahi001/defi-rates-mcp",
   "description": "Real-time DeFi lending rates across 13+ protocols",
   "author": "DefiBorrow",
-  "sourceUrl": "https://github.com/yourusername/defi-rates-mcp",
-  "installCommand": "npx -y @defiborrow/rates-mcp"
+  "sourceUrl": "https://github.com/qingfeng/defi-rates-mcp",
+  "installCommand": "npx -y @asahi001/defi-rates-mcp"
 }
 ```
 
@@ -147,7 +147,7 @@ https://github.com/modelcontextprotocol/servers
 
 ### npm 包名规则
 
-- 带 scope 的包（如 `@defiborrow/rates-mcp`）需要 `--access public`
+- 带 scope 的包（如 `@asahi001/defi-rates-mcp`）需要 `--access public`
 - 不带 scope 的包（如 `defi-rates-mcp`）直接 `npm publish`
 
 ### 版本号语义

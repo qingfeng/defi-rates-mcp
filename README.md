@@ -54,13 +54,13 @@ Compare rates across different platforms for the same asset pair.
 ### Option 1: Install from npm (Recommended)
 
 ```bash
-npm install -g @defiborrow/rates-mcp
+npm install -g @asahi001/defi-rates-mcp
 ```
 
 ### Option 2: Install from source
 
 ```bash
-git clone https://github.com/yourusername/defi-rates-mcp.git
+git clone https://github.com/qingfeng/defi-rates-mcp.git
 cd defi-rates-mcp
 npm install
 ```
@@ -81,7 +81,7 @@ Add to your Claude Desktop config file:
   "mcpServers": {
     "defi-rates": {
       "command": "npx",
-      "args": ["-y", "@defiborrow/rates-mcp"]
+      "args": ["-y", "@asahi001/defi-rates-mcp"]
     }
   }
 }
