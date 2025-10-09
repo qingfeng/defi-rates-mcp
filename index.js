@@ -57,10 +57,20 @@ async function fetchLatestRates(filters = {}) {
       data = data.filter(r => r.chain.toLowerCase() === filters.chain.toLowerCase());
     }
     if (filters.asset) {
-      data = data.filter(r => r.asset.toLowerCase().includes(filters.asset.toLowerCase()));
+      // 默认使用精确匹配，避免 USDC 匹配到 syrupUSDC
+      if (filters.exactMatch !== false) {
+        data = data.filter(r => r.asset.toLowerCase() === filters.asset.toLowerCase());
+      } else {
+        data = data.filter(r => r.asset.toLowerCase().includes(filters.asset.toLowerCase()));
+      }
     }
     if (filters.collateral) {
-      data = data.filter(r => r.collateral.toLowerCase().includes(filters.collateral.toLowerCase()));
+      // 默认使用精确匹配
+      if (filters.exactMatch !== false) {
+        data = data.filter(r => r.collateral.toLowerCase() === filters.collateral.toLowerCase());
+      } else {
+        data = data.filter(r => r.collateral.toLowerCase().includes(filters.collateral.toLowerCase()));
+      }
     }
 
     return data;
