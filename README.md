@@ -31,7 +31,8 @@ Get the latest lending rates with optional filters.
 - `chain` (optional): Filter by blockchain (ethereum, arbitrum, base, bsc, solana, etc.)
 - `asset` (optional): Filter by borrow asset (USDC, USDT, WETH, etc.)
 - `collateral` (optional): Filter by collateral asset
-- `limit` (optional): Maximum results to return (default: 20)
+- `limit` (optional): Maximum results to return (default: 10)
+- `sort` (optional): Sort results by rate — `borrow_lowest`, `borrow_highest`, `supply_highest`, or `supply_lowest`
 
 ### 2. `get_dbi_index`
 Get the DBI (DeFi Borrow Index) - a weighted average of stablecoin borrow rates across major protocols.
@@ -157,6 +158,8 @@ Once configured, you can ask Claude:
 > "What are the current USDC borrow rates on Aave?"
 
 > "Show me all Ethereum lending rates for WETH collateral"
+
+> "Find the cheapest place to borrow USDC right now"
 
 ### Search Best Rates
 > "Find the best USDT supply rates across all platforms"

@@ -59,7 +59,8 @@ function handleResponse(response) {
       arguments: {
         collateral: 'SOL',
         asset: 'USDC',
-        limit: 50
+        limit: 10,
+        sort: 'borrow_lowest'
       }
     });
 
@@ -76,33 +77,24 @@ function handleResponse(response) {
       } else {
         console.log(`找到 ${data.length} 个平台支持 SOL 质押借 USDC:\n`);
 
-        // 按借贷利率排序
-        const sorted = data.sort((a, b) => {
-          const aRate = parseFloat(a.rates.borrowApy.replace('%', ''));
-          const bRate = parseFloat(b.rates.borrowApy.replace('%', ''));
-          return aRate - bRate;
-        });
-
-        sorted.forEach((item, index) => {
+        data.forEach((item, index) => {
           console.log(`${index + 1}. ${item.platform} (${item.chain})`);
           console.log(`   借贷对: ${item.asset}/${item.collateral}`);
           console.log(`   💰 借贷利率: ${item.rates.borrowApy}`);
           console.log(`   💵 存款利率: ${item.rates.supplyApy}`);
           console.log(`   🔒 清算阈值: ${item.price.liquidationThreshold}`);
-          console.log(`   🔗 链接: ${item.urls.borrow}`);
+          console.log(`   🔗 链接: ${item.borrowUrl}`);
           console.log('');
         });
 
         console.log('='.repeat(80));
-        console.log(`\n✨ 最佳借贷利率: ${sorted[0].platform} - ${sorted[0].rates.borrowApy}`);
+        console.log(`\n✨ 最佳借贷利率: ${data[0].platform} - ${data[0].rates.borrowApy}`);
       }
     }
 
-    // 测试完成，延迟退出确保输出完成
-    setTimeout(() => {
-      server.kill();
-      process.exit(0);
-    }, 100);
+    // 测试完成，立即清理退出
+    server.kill();
+    process.exit(0);
   }
 }
 

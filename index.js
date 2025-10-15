@@ -36,6 +36,57 @@ function formatPercent(value) {
   return `${(value * 100).toFixed(2)}%`;
 }
 
+function parsePercent(value) {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  if (typeof value === 'number') {
+    return value;
+  }
+  if (typeof value === 'string') {
+    const normalized = value.replace('%', '').replace(/,/g, '').trim();
+    if (normalized === '') {
+      return null;
+    }
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function sortRates(data, sortOption) {
+  if (!sortOption) {
+    return data;
+  }
+
+  const getBorrow = (entry) => parsePercent(entry?.rates?.borrowApy);
+  const getSupply = (entry) => parsePercent(entry?.rates?.supplyApy);
+
+  const compareAsc = (getter) => (a, b) => {
+    const aVal = getter(a);
+    const bVal = getter(b);
+    if (aVal === null && bVal === null) return 0;
+    if (aVal === null) return 1;
+    if (bVal === null) return -1;
+    return aVal - bVal;
+  };
+
+  const compareDesc = (getter) => (a, b) => compareAsc(getter)(b, a);
+
+  switch (sortOption) {
+    case 'borrow_lowest':
+      return data.slice().sort(compareAsc(getBorrow));
+    case 'borrow_highest':
+      return data.slice().sort(compareDesc(getBorrow));
+    case 'supply_highest':
+      return data.slice().sort(compareDesc(getSupply));
+    case 'supply_lowest':
+      return data.slice().sort(compareAsc(getSupply));
+    default:
+      return data;
+  }
+}
+
 // 辅助函数：获取最新利率数据
 async function fetchLatestRates(filters = {}) {
   try {
@@ -172,8 +223,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             limit: {
               type: 'number',
-              description: 'Maximum number of results to return (default: 20)',
-              default: 20
+              description: 'Maximum number of results to return (default: 10)',
+              default: 10
+            },
+            sort: {
+              type: 'string',
+              description: 'Optional sorting for rates (e.g., borrow_lowest for cheapest borrow rates)',
+              enum: ['borrow_lowest', 'borrow_highest', 'supply_highest', 'supply_lowest']
             }
           },
         },
@@ -288,8 +344,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           collateral: args.collateral,
         };
 
-        const data = await fetchLatestRates(filters);
-        const limit = args.limit || 20;
+        let data = await fetchLatestRates(filters);
+
+        if (args.sort) {
+          data = sortRates(data, args.sort);
+        }
+
+        const limit = args.limit || 10;
         const results = data.slice(0, limit);
 
         return {
