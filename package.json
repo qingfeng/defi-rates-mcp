@@ -1,6 +1,6 @@
 {
   "name": "@asahi001/defi-rates-mcp",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "MCP server providing AI access to real-time DeFi lending rates across 13+ protocols",
   "type": "module",
   "main": "index.js",
