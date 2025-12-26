@@ -1,7 +1,7 @@
 {
   "name": "@asahi001/defi-rates-mcp",
-  "version": "1.0.3",
-  "description": "MCP server providing AI access to real-time DeFi lending rates across 13+ protocols",
+  "version": "1.1.0",
+  "description": "MCP server providing AI access to real-time DeFi lending rates and earn markets across 14+ protocols. Query Aave, Morpho, Spark stUSDS, Compound, and more.",
   "type": "module",
   "main": "index.js",
   "bin": {
@@ -39,7 +39,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.5.0",
+    "@modelcontextprotocol/sdk": "^1.25.1",
     "axios": "^1.6.0"
   },
   "files": [

@@ -13,33 +13,49 @@ Model Context Protocol (MCP) server that provides AI assistants with access to r
 
 ## ✨ Highlights
 
-- 📊 **13+ Protocols**: Aave, Morpho, Compound, Venus, Lista, Moonwell, Euler, Drift, Solend, Jupiter & more
+- 📊 **14+ Protocols**: Aave, Morpho, Compound, Venus, Lista, Spark, Felix, Euler, Drift, Jupiter, HypurrFi & more
 - ⚡ **Real-time Data**: Updated hourly from production DeFi protocols
-- 🔧 **5 Powerful Tools**: Query rates, compare platforms, calculate strategies
+- 🔧 **6 Powerful Tools**: Query lending rates, earn markets, compare platforms, calculate strategies
 - 🤖 **AI-Ready**: Built for Claude Desktop, Cline, and other MCP clients
 - 🌐 **Multi-Chain**: Ethereum, Arbitrum, Base, BSC, Solana, HyperEVM
+- 💰 **Earn Markets**: Access Morpho Vaults, Spark stUSDS (12%+ APY), and other single-asset yield products
 
 ## Features
 
-This MCP server provides 5 powerful tools for querying and analyzing DeFi lending data:
+This MCP server provides 6 powerful tools for querying and analyzing DeFi lending data:
 
 ### 1. `get_latest_rates`
-Get the latest lending rates with optional filters.
+Get the latest lending rates for collateralized borrowing markets.
 
 **Parameters:**
-- `platform` (optional): Filter by platform (Aave, Morpho, Compound, Venus, etc.)
-- `chain` (optional): Filter by blockchain (ethereum, arbitrum, base, bsc, solana, etc.)
+- `platform` (optional): Filter by platform (Aave, Morpho, Compound, Venus, Lista, HyperLend, Fluid, HypurrFi, Euler, Drift, Jupiter)
+- `chain` (optional): Filter by blockchain (ethereum, arbitrum, base, bsc, solana, hyperevm)
 - `asset` (optional): Filter by borrow asset (USDC, USDT, WETH, etc.)
 - `collateral` (optional): Filter by collateral asset
 - `limit` (optional): Maximum results to return (default: 10)
 - `sort` (optional): Sort results by rate — `borrow_lowest`, `borrow_highest`, `supply_highest`, or `supply_lowest`
 
-### 2. `get_dbi_index`
+### 2. `get_earn_markets`
+Get single-asset earn/vault products (no collateral required). Perfect for finding the best passive yield opportunities.
+
+**Parameters:**
+- `platform` (optional): Filter by platform (Morpho, Spark, Compound, AAVE, Lista, Felix, Euler)
+- `chain` (optional): Filter by blockchain (ethereum, arbitrum, base, bsc, solana)
+- `asset` (optional): Filter by deposit asset (USDC, USDT, stUSDS, sUSDS, WETH, SOL)
+- `limit` (optional): Maximum results to return (default: 10)
+- `sort` (optional): Sort by APY — `supply_highest` or `supply_lowest`
+
+**Examples:**
+- Find best stablecoin yields: `asset: "USDC", sort: "supply_highest"`
+- Check Spark stUSDS APY: `platform: "Spark", asset: "stUSDS"`
+- Best Morpho Vaults: `platform: "Morpho", sort: "supply_highest"`
+
+### 3. `get_dbi_index`
 Get the DBI (DeFi Borrow Index) - a weighted average of stablecoin borrow rates across major protocols.
 
 **No parameters required.**
 
-### 3. `search_best_rates`
+### 4. `search_best_rates`
 Find the best borrow or supply rates for a specific asset.
 
 **Parameters:**
@@ -48,7 +64,7 @@ Find the best borrow or supply rates for a specific asset.
 - `chain` (optional): Filter by blockchain
 - `limit` (optional): Number of results (default: 10)
 
-### 4. `calculate_looping_strategy`
+### 5. `calculate_looping_strategy`
 Calculate leverage looping strategy metrics.
 
 **Parameters:**
@@ -59,7 +75,7 @@ Calculate leverage looping strategy metrics.
 - `collateralPrice` (required): Current price in USD
 - `ltv` (required): Target LTV ratio percentage (e.g., 75)
 
-### 5. `compare_platforms`
+### 6. `compare_platforms`
 Compare rates across different platforms for the same asset pair.
 
 **Parameters:**
@@ -154,12 +170,21 @@ node /Users/qingfeng/Desktop/solana_lp/defi-rates-mcp/index.js
 
 Once configured, you can ask Claude:
 
-### Query Latest Rates
+### Query Lending Rates
 > "What are the current USDC borrow rates on Aave?"
 
 > "Show me all Ethereum lending rates for WETH collateral"
 
 > "Find the cheapest place to borrow USDC right now"
+
+### Query Earn Markets
+> "What's the APY for Spark stUSDS?"
+
+> "Find the best USDC earn vaults across all platforms"
+
+> "Show me Morpho vault yields on Ethereum"
+
+> "What are the top 5 highest yield single-asset deposit products?"
 
 ### Search Best Rates
 > "Find the best USDT supply rates across all platforms"
@@ -182,19 +207,26 @@ This MCP server fetches data from:
 - **API Endpoint**: https://defiborrow.loan/api
 - **Update Frequency**: Real-time (data updated every hour)
 - **Supported Platforms**:
-  - Aave (Ethereum, Arbitrum, Base)
-  - Morpho (Ethereum)
-  - Compound (Ethereum)
-  - Venus (BSC)
-  - Lista (BSC)
-  - Moonwell (Base)
-  - HyperLend (HyperEVM)
-  - Fluid (Ethereum)
-  - HypurrFi (Hyperliquid)
-  - Euler (Ethereum, Arbitrum)
-  - Drift (Solana)
-  - Solend (Solana)
-  - Jupiter (Solana)
+  - **Lending Markets** (collateralized borrowing):
+    - Aave (Ethereum, Arbitrum, Base, Optimism, Polygon, Avalanche, Gnosis)
+    - Morpho (Ethereum, Base)
+    - Compound V3 (Ethereum, Arbitrum, Base, Optimism, Polygon)
+    - Venus (BSC)
+    - Lista (BSC)
+    - HyperLend (HyperEVM)
+    - Fluid (Ethereum, Arbitrum, Base)
+    - HypurrFi (HyperEVM)
+    - Euler (Ethereum, Arbitrum, Base)
+    - Drift (Solana)
+    - Jupiter (Solana)
+  - **Earn Markets** (single-asset vaults):
+    - Morpho Vaults (Ethereum, Base, Arbitrum)
+    - Spark sUSDS/stUSDS (Ethereum - 12%+ APY)
+    - Compound cTokens (Multi-chain)
+    - AAVE aTokens (Multi-chain)
+    - Lista Earn Vaults (BSC)
+    - Felix (Solana)
+    - Euler Vaults (Multi-chain)
 
 ## Development
 

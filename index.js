@@ -87,7 +87,7 @@ function sortRates(data, sortOption) {
   }
 }
 
-// 辅助函数：获取最新利率数据
+// 辅助函数：获取最新利率数据（借贷市场）
 async function fetchLatestRates(filters = {}) {
   try {
     const response = await axios.get(`${WORKER_URL}/api/platforms`, {
@@ -127,6 +127,41 @@ async function fetchLatestRates(filters = {}) {
     return data;
   } catch (error) {
     throw new Error(`Failed to fetch rates: ${error.message}`);
+  }
+}
+
+// 辅助函数：获取理财市场数据（单币存款）
+async function fetchEarnMarkets(filters = {}) {
+  try {
+    const response = await axios.get(`${WORKER_URL}/api/earn-markets`, {
+      timeout: 30000
+    });
+
+    if (!response.data.success) {
+      throw new Error('Failed to fetch earn markets data');
+    }
+
+    let data = response.data.data;
+
+    // 应用筛选
+    if (filters.platform) {
+      data = data.filter(r => r.platform.toLowerCase() === filters.platform.toLowerCase());
+    }
+    if (filters.chain) {
+      data = data.filter(r => r.chain.toLowerCase() === filters.chain.toLowerCase());
+    }
+    if (filters.asset) {
+      // 默认使用精确匹配
+      if (filters.exactMatch !== false) {
+        data = data.filter(r => r.asset.toLowerCase() === filters.asset.toLowerCase());
+      } else {
+        data = data.filter(r => r.asset.toLowerCase().includes(filters.asset.toLowerCase()));
+      }
+    }
+
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to fetch earn markets: ${error.message}`);
   }
 }
 
@@ -201,13 +236,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     tools: [
       {
         name: 'get_latest_rates',
-        description: 'Get the latest DeFi lending rates. You can filter by platform, chain, asset, or collateral.',
+        description: 'Get the latest DeFi lending rates (collateralized borrowing markets). You can filter by platform, chain, asset, or collateral.',
         inputSchema: {
           type: 'object',
           properties: {
             platform: {
               type: 'string',
-              description: 'Filter by platform (e.g., Aave, Morpho, Compound, Venus, Lista, Moonwell, HyperLend, Fluid, Euler, Drift, Solend, Jupiter)',
+              description: 'Filter by platform (e.g., Aave, Morpho, Compound, Venus, Lista, HyperLend, Fluid, HypurrFi, Euler, Drift, Jupiter)',
             },
             chain: {
               type: 'string',
@@ -230,6 +265,37 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               type: 'string',
               description: 'Optional sorting for rates (e.g., borrow_lowest for cheapest borrow rates)',
               enum: ['borrow_lowest', 'borrow_highest', 'supply_highest', 'supply_lowest']
+            }
+          },
+        },
+      },
+      {
+        name: 'get_earn_markets',
+        description: 'Get single-asset earn/vault products (no collateral required). Includes Morpho Vaults, Spark sUSDS/stUSDS, Compound cTokens, AAVE aTokens, etc. These are simple deposit products that earn yield without borrowing.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            platform: {
+              type: 'string',
+              description: 'Filter by platform (e.g., Morpho, Spark, Compound, AAVE, Lista, Felix, Euler)',
+            },
+            chain: {
+              type: 'string',
+              description: 'Filter by blockchain (e.g., ethereum, arbitrum, base, bsc, solana)',
+            },
+            asset: {
+              type: 'string',
+              description: 'Filter by deposit asset (e.g., USDC, USDT, stUSDS, sUSDS, WETH, SOL)',
+            },
+            limit: {
+              type: 'number',
+              description: 'Maximum number of results to return (default: 10)',
+              default: 10
+            },
+            sort: {
+              type: 'string',
+              description: 'Optional sorting (supply_highest for best APY, supply_lowest for lowest APY)',
+              enum: ['supply_highest', 'supply_lowest']
             }
           },
         },
@@ -348,6 +414,53 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
         if (args.sort) {
           data = sortRates(data, args.sort);
+        }
+
+        const limit = args.limit || 10;
+        const results = data.slice(0, limit);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(results, null, 2),
+            },
+          ],
+        };
+      }
+
+      case 'get_earn_markets': {
+        const filters = {
+          platform: args.platform,
+          chain: args.chain,
+          asset: args.asset,
+        };
+
+        let data = await fetchEarnMarkets(filters);
+
+        // 排序
+        if (args.sort) {
+          const getSupply = (entry) => parsePercent(entry?.rates?.supplyApy);
+
+          if (args.sort === 'supply_highest') {
+            data = data.slice().sort((a, b) => {
+              const aVal = getSupply(a);
+              const bVal = getSupply(b);
+              if (aVal === null && bVal === null) return 0;
+              if (aVal === null) return 1;
+              if (bVal === null) return -1;
+              return bVal - aVal; // 降序
+            });
+          } else if (args.sort === 'supply_lowest') {
+            data = data.slice().sort((a, b) => {
+              const aVal = getSupply(a);
+              const bVal = getSupply(b);
+              if (aVal === null && bVal === null) return 0;
+              if (aVal === null) return 1;
+              if (bVal === null) return -1;
+              return aVal - bVal; // 升序
+            });
+          }
         }
 
         const limit = args.limit || 10;
