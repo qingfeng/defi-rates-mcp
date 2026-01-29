@@ -1,7 +1,7 @@
 {
   "name": "@asahi001/defi-rates-mcp",
-  "version": "1.1.0",
-  "description": "MCP server providing AI access to real-time DeFi lending rates and earn markets across 14+ protocols. Query Aave, Morpho, Spark stUSDS, Compound, and more.",
+  "version": "2.0.0",
+  "description": "MCP server for real-time DeFi lending data. Query rates, track whale activity, monitor liquidations across 14+ protocols. Remote endpoint: https://defiborrow.loan/mcp",
   "type": "module",
   "main": "index.js",
   "bin": {
@@ -23,7 +23,11 @@
     "ethereum",
     "solana",
     "ai",
-    "claude"
+    "claude",
+    "whale-tracking",
+    "liquidations",
+    "on-chain-events",
+    "erc-8004"
   ],
   "author": "DefiBorrow <contact@defiborrow.loan>",
   "license": "MIT",
