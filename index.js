@@ -182,6 +182,64 @@ async function fetchEarnMarkets(filters = {}) {
   }
 }
 
+async function fetchPoolEvents(filters = {}) {
+  try {
+    const response = await axios.get(`${API_URL}/api/pool-events`, {
+      params: {
+        protocol: filters.protocol,
+        chain: filters.chain,
+        asset: filters.asset,
+        collateral: filters.collateral,
+        marketType: filters.marketType || 'borrow',
+        eventType: filters.eventType || 'all',
+        window: filters.window || '30d',
+        limit: Math.min(filters.limit || 50, 200),
+      },
+      timeout: 30000
+    });
+
+    if (!response.data.success) {
+      throw new Error('Failed to fetch pool events');
+    }
+
+    return response.data;
+  } catch (error) {
+    throw new Error(`Failed to fetch pool events: ${error.message}`);
+  }
+}
+
+async function fetchAlphaSignals(filters = {}) {
+  try {
+    const response = await axios.post(`${API_URL}/mcp`, {
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'tools/call',
+      params: {
+        name: 'get_alpha_signals',
+        arguments: {
+          limit: Math.min(filters.limit || 20, 100),
+          hours: filters.hours || 24,
+          chain: filters.chain,
+          protocol: filters.protocol,
+          signal_type: filters.signal_type,
+          severity: filters.severity,
+        }
+      }
+    }, {
+      timeout: 30000
+    });
+
+    const text = response.data?.result?.content?.[0]?.text;
+    if (!text) {
+      throw new Error('Invalid MCP alpha response');
+    }
+
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(`Failed to fetch alpha signals: ${error.message}`);
+  }
+}
+
 // Format event for output
 function formatEvent(event) {
   return {
@@ -394,6 +452,43 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         }
       },
       {
+        name: 'get_pool_events',
+        description: 'Get the event timeline for a specific lending pool, matching the website pool detail page.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            protocol: { type: 'string', description: 'Protocol/platform name' },
+            chain: { type: 'string', description: 'Chain name' },
+            asset: { type: 'string', description: 'Borrow or earn asset symbol' },
+            collateral: { type: 'string', description: 'Optional collateral asset for dual-asset borrow markets' },
+            marketType: {
+              type: 'string',
+              enum: ['borrow', 'earn'],
+              description: 'Pool type (default: borrow)',
+              default: 'borrow'
+            },
+            eventType: {
+              type: 'string',
+              enum: ['all', 'Borrow', 'Supply', 'Withdraw', 'Repay', 'Liquidation', 'Flash Loan', 'Flashloan'],
+              description: 'Optional event-type filter (default: all)',
+              default: 'all'
+            },
+            window: {
+              type: 'string',
+              enum: ['24h', '7d', '30d', 'all'],
+              description: 'Time window for events (default: 30d)',
+              default: '30d'
+            },
+            limit: {
+              type: 'number',
+              description: 'Number of events to return (default: 50)',
+              default: 50
+            }
+          },
+          required: ['protocol', 'chain', 'asset']
+        }
+      },
+      {
         name: 'find_best_borrow',
         description: 'Find the lowest borrowing rate for a specific asset across all platforms and chains',
         inputSchema: {
@@ -442,6 +537,33 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             }
           },
           required: ['asset']
+        }
+      },
+      {
+        name: 'get_alpha_signals',
+        description: 'Get recent alpha signals derived from lending monitors.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            limit: {
+              type: 'number',
+              description: 'Number of signals to return (default: 20, max: 100)',
+              default: 20
+            },
+            hours: {
+              type: 'number',
+              description: 'Only return signals fired in the last N hours (default: 24)',
+              default: 24
+            },
+            chain: { type: 'string', description: 'Optional chain filter' },
+            protocol: { type: 'string', description: 'Optional protocol filter' },
+            signal_type: { type: 'string', description: 'Optional signal type filter' },
+            severity: {
+              type: 'string',
+              enum: ['low', 'mid', 'high'],
+              description: 'Optional minimum severity filter'
+            }
+          }
         }
       }
     ],
@@ -589,6 +711,30 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
+      case 'get_pool_events': {
+        const payload = await fetchPoolEvents({
+          protocol: args.protocol,
+          chain: args.chain,
+          asset: args.asset,
+          collateral: args.collateral,
+          marketType: args.marketType,
+          eventType: args.eventType,
+          window: args.window,
+          limit: args.limit,
+        });
+
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              meta: payload.meta,
+              count: Array.isArray(payload.events) ? payload.events.length : 0,
+              events: payload.events || []
+            }, null, 2)
+          }]
+        };
+      }
+
       case 'find_best_borrow': {
         let data = await fetchLendingRates({
           asset: args.asset,
@@ -687,6 +833,24 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 url: r.borrowUrl
               }))
             }, null, 2)
+          }]
+        };
+      }
+
+      case 'get_alpha_signals': {
+        const payload = await fetchAlphaSignals({
+          limit: args.limit,
+          hours: args.hours,
+          chain: args.chain,
+          protocol: args.protocol,
+          signal_type: args.signal_type,
+          severity: args.severity,
+        });
+
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify(payload, null, 2)
           }]
         };
       }
