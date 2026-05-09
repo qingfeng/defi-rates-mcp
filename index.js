@@ -52,6 +52,43 @@ function parsePercent(value) {
   return null;
 }
 
+function normalizeProtocolAlias(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (!normalized) return '';
+  if (normalized === 'aave' || normalized === 'aave v3') return 'aave';
+  if (normalized === 'compound' || normalized === 'compound v3') return 'compound';
+  return normalized;
+}
+
+function matchesProtocolAlias(actual, expected) {
+  const actualNormalized = normalizeProtocolAlias(actual);
+  const expectedNormalized = normalizeProtocolAlias(expected);
+  if (!actualNormalized || !expectedNormalized) return false;
+  return actualNormalized === expectedNormalized;
+}
+
+function formatUsdMaybe(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric) || numeric <= 0) return null;
+  return `$${numeric.toLocaleString()}`;
+}
+
+function formatUtilizationMaybe(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric) || numeric < 0) return null;
+  if (numeric <= 1.5) {
+    return `${(numeric * 100).toFixed(1)}%`;
+  }
+  return null;
+}
+
+function extractTvl(additionalData = {}) {
+  return additionalData.tvl
+    ?? additionalData.total_supply_usd
+    ?? additionalData.supply_assets_usd
+    ?? null;
+}
+
 // Fetch lending events from API
 async function fetchLendingEvents(params = {}) {
   try {
@@ -91,7 +128,7 @@ async function fetchLendingRates(filters = {}) {
 
     // Apply filters
     if (filters.platform) {
-      data = data.filter(r => r.platform.toLowerCase() === filters.platform.toLowerCase());
+      data = data.filter(r => matchesProtocolAlias(r.platform, filters.platform));
     }
     if (filters.chain) {
       data = data.filter(r => r.chain.toLowerCase() === filters.chain.toLowerCase());
@@ -124,7 +161,7 @@ async function fetchEarnMarkets(filters = {}) {
 
     // Apply filters
     if (filters.platform) {
-      data = data.filter(r => r.platform.toLowerCase() === filters.platform.toLowerCase());
+      data = data.filter(r => matchesProtocolAlias(r.platform, filters.platform));
     }
     if (filters.chain) {
       data = data.filter(r => r.chain.toLowerCase() === filters.chain.toLowerCase());
@@ -162,6 +199,9 @@ function formatEvent(event) {
 
 // Format lending market for output
 function formatLendingMarket(market) {
+  const tvl = extractTvl(market.additional_data || {});
+  const utilization = formatUtilizationMaybe(market.additional_data?.utilization);
+
   return {
     platform: market.platform,
     chain: market.chain,
@@ -170,19 +210,22 @@ function formatLendingMarket(market) {
     borrow_apy: market.rates?.borrowApy || 'N/A',
     supply_apy: market.rates?.supplyApy || 'N/A',
     liquidation_threshold: market.price?.liquidationThreshold || null,
-    tvl: market.tvl || null,
+    tvl: formatUsdMaybe(tvl ?? market.tvl),
+    utilization,
     url: market.borrowUrl || null,
   };
 }
 
 // Format earn market for output
 function formatEarnMarket(market) {
+  const tvl = extractTvl(market.additional_data || {});
+
   return {
     platform: market.platform,
     chain: market.chain,
     asset: market.asset,
     supply_apy: market.rates?.supplyApy || 'N/A',
-    tvl: market.tvl || null,
+    tvl: formatUsdMaybe(tvl ?? market.tvl),
     url: market.borrowUrl || null,
   };
 }
